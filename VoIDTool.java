@@ -72,7 +72,6 @@ public class VoIDTool {
                 file.write("        a                 dcat:Distribution ;\n");
                 file.write("void:dataDump     <https://jenkins.bigcat.unimaas.nl/job/GPML%20to%20GPML%20+%20WP%20RDF/ws/WP2RDF/output/gpml/*zip*/gpml.zip> ;\n");
                 file.write("dcat:downloadURL  <https://jenkins.bigcat.unimaas.nl/job/GPML%20to%20GPML%20+%20WP%20RDF/ws/WP2RDF/output/gpml/*zip*/gpml.zip> ;");
-
                 break;
             case "wikipathways":
                 file.write("http://rdf.wikipathways.org/20190713/datasetDescription/");
@@ -110,6 +109,7 @@ public class VoIDTool {
                 file.write("dcterms:publisher <http://www.ebi.ac.uk> ;");
                 file.write("dcterms:license <http://creativecommons.org/licenses/by-sa/3.0/> ;");
                 file.write("void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/20.0/chembl_20.0_targetrel.ttl.gz> .");
+                break;
             case "emsembl":
                 file.write("void:DatasetDescription ; \n");
                 file.write("dcterms:description \"Ensembl is a joint project between EMBL - EBI and the Wellcome Trust Sanger Institute to develop a software system which produces and maintains automatic annotation on selected eukaryotic genomes.\"@en ;\n");
