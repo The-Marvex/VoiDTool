@@ -2,12 +2,16 @@ package org.bridgedb.tools.VoID;
 
 import org.bridgedb.DataSource;
 import org.bridgedb.IDMapperException;
+import org.bridgedb.bio.DataSourceTxt;
 import org.bridgedb.rdb.SimpleGdb;
 import org.bridgedb.rdb.SimpleGdbFactory;
+import org.bridgedb.tools.qc.PatternChecker;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+
 
 public class VoIDTool {
     private PrintStream out;
@@ -16,6 +20,7 @@ public class VoIDTool {
     private SimpleGdb oldGdb;
     private SimpleGdb newGdb;
     FileWriter file = new FileWriter(".\\rdf.void", true);
+
 
     public VoIDTool(File f1, File f2) throws IDMapperException, IOException {
         this(f1,f2, System.out);
@@ -33,14 +38,7 @@ public class VoIDTool {
         String url2 = "jdbc:derby:jar:(" + newDb + ")database";
         newGdb = SimpleGdbFactory.createInstance("db2", url2);
     }
-    public void run()throws IDMapperException{
-        initDatabases();
-        createVoid();
-
-    }
-    public void createVoid(String db1, String db2)throws IOException{
-        db1 = db1.toLowerCase();
-        db2 = db2.toLowerCase();
+    public void run() throws IDMapperException, IOException {
         file.write("@prefix void:  <http://rdfs.org/ns/void#> .\n");
         file.write("@prefix pav:   <http://purl.org/pav/> .\n");
         file.write("@prefix freq:  <http://purl.org/cld/freq/> .\n");
@@ -58,6 +56,16 @@ public class VoIDTool {
         file.write("@prefix prov:  <http://www.w3.org/ns/prov#> .\n");
         file.write("@prefix foaf:  <http://xmlns.com/foaf/0.1/> .\n");
         file.write("\n");
+        initDatabases();
+        for (DataSource ds : newGdb.getCapabilities().getSupportedSrcDataSources()) {
+            createVoid(ds.getFullName());
+        }
+        for (DataSource ds : oldGdb.getCapabilities().getSupportedSrcDataSources()) {
+            createVoid(ds.getFullName());
+        }
+    }
+    public void createVoid(String db1)throws IOException{
+        db1 = db1.toLowerCase();
         switch(db1) {
             case "gmpl":
                 file.write("<http://rdf.wikipathways.org/20190713/rdf/gpml> \n");
@@ -90,6 +98,7 @@ public class VoIDTool {
                 file.write("dcterms:title \"Chemical Entities of Biological Interest (ChEBI)\"@en ; \n");
                 file.write("dcterms:description \"Chemical Entities of Biological Interest (ChEBI) is a freely available dictionary of molecular entities focused on &#39;small&#39; chemical compounds.\"@en ; \n");
                 file.write("foaf:homepage <http://www.ebi.ac.uk/chebi/> ; \n");
+                file.write("dcterms:publisher <http://www.ebi.ac.uk> ;");
                 file.write("void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl> ; \n");
                 file.write("dcterms:license <http://creativecommons.org/licenses/by-sa/3.0/> ; \n");
                 break;
@@ -98,10 +107,32 @@ public class VoIDTool {
                 file.write("dcterms:title \"The ChEMBL Database\" ;\n");
                 file.write("dcterms:description \\\"ChEMBL is a database of bioactive drug-like small molecules, it contains 2-D structures, calculated properties (e.g. logP, Molecular Weight, Lipinski Parameters, etc.) and abstracted bioactivities (e.g. binding constants, pharmacology and ADMET data). The data is abstracted and curated from the primary scientific literature, and cover a significant fraction of the SAR and discovery of modern drugs.\\\" ;\");\n");
                 file.write("foaf:page <ftp://ftp.ebi.ac.uk/pub/databases/chembl/> ;");
+                file.write("dcterms:publisher <http://www.ebi.ac.uk> ;");
                 file.write("dcterms:license <http://creativecommons.org/licenses/by-sa/3.0/> ;");
                 file.write("void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBL-RDF/20.0/chembl_20.0_targetrel.ttl.gz> .");
-            case "uniprot":
-                file.write();
+            case "emsembl":
+                file.write("void:DatasetDescription ; \n");
+                file.write("dcterms:description \"Ensembl is a joint project between EMBL - EBI and the Wellcome Trust Sanger Institute to develop a software system which produces and maintains automatic annotation on selected eukaryotic genomes.\"@en ;\n");
+                file.write("dcterms:license <http://www.ebi.ac.uk/Information/termsofuse.html> ;");
+                file.write("dcterms:publisher <http://www.ebi.ac.uk> ;");
+                file.write("dcterms:title \"Ensembl RDF\"@en ;");
+                file.write("foaf:page <ftp://ftp.ebi.ac.uk/pub/databases/ensembl/> ;");
+                file.write("void:dataDump <ftp://ftp.ebi.ac.uk/pub/databases/RDF/ensembl/83> ;");
         }
+    }
+    public static void printUsage()
+    {
+        System.out.println ("Expected 2 arguments: <old database> <new database>");
+    }
+    public static void main(String[] args) throws IOException, IDMapperException, SQLException {
+        if (args.length != 2) {
+            printUsage(); return;
+        }
+        VoIDTool main = new VoIDTool(new File(args[0]), new File(args[1]));
+
+        DataSourceTxt.init();
+        main.run();
+        PatternChecker checker = new PatternChecker();
+        checker.run(new File(args[0]));
     }
 }
