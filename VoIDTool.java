@@ -19,7 +19,7 @@ public class VoIDTool {
     private final File newDb;
     private SimpleGdb oldGdb;
     private SimpleGdb newGdb;
-    FileWriter file = new FileWriter(".\\rdf.void", true);
+    FileWriter file = new FileWriter(".\\rdf.txt", true);
 
 
     public VoIDTool(File f1, File f2) throws IDMapperException, IOException {
@@ -57,10 +57,10 @@ public class VoIDTool {
         file.write("@prefix foaf:  <http://xmlns.com/foaf/0.1/> .\n");
         file.write("\n");
         initDatabases();
-        for (DataSource ds : newGdb.getCapabilities().getSupportedSrcDataSources()) {
+        for (DataSource ds : oldGdb.getCapabilities().getSupportedSrcDataSources()) {
             createVoid(ds.getFullName());
         }
-        for (DataSource ds : oldGdb.getCapabilities().getSupportedSrcDataSources()) {
+        for (DataSource ds : newGdb.getCapabilities().getSupportedSrcDataSources()) {
             createVoid(ds.getFullName());
         }
     }
@@ -90,7 +90,12 @@ public class VoIDTool {
                 file.write(" void:subjectsTarget  <http://rdf.wikipathways.org/20190713/rdf/>. \n");
                 break;
             case "hmdb":
-                file.write();
+                file.write("void:DatasetDescription ; \n");
+                file.write("dcterms:title The Human Metabolome Database; \n");
+                file.write("dcterms:description The Human Metabolome Database (HMDB) is a database containing detailed information about small molecule metabolites found in the human body.It contains or links 1) chemical 2) clinical and 3) molecular biology/biochemistry data. \n");
+                file.write("foaf:homepage <http://www.hmdb.ca> \n");
+                file.write("dcterms:publisher University of Alberta \n");
+                file.write("dcterms:license <http://www.hmdb.ca/about#cite> \n");
                 break;
             case "chebi":
                 file.write("void:DatasetDescription ; \n");
